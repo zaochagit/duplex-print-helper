@@ -173,6 +173,27 @@ def wait_print_done(printer_name, new_job_ids, timeout=300):
     return False
 
 
+def set_printer_direct(printer_name, enable):
+    """把打印机切到『直连/前台』打印(enable=True)或恢复(enable=False)。
+    返回原来的 Attributes；失败返回 None（调用方据此走后台兜底）。
+    直连模式下 GDI 的 EndDoc 会阻塞到数据发到打印机，天然『前台执行』，
+    对大扫描件 PDF 不进 spool，零等待；同时也就不需要手动勾『立即开始打印』。"""
+    import win32print
+    try:
+        DIRECT = getattr(win32print, "PRINTER_ATTRIBUTE_DIRECT", 0x20)
+        h = win32print.OpenPrinter(printer_name)
+        try:
+            pi2 = win32print.GetPrinter(h, 2)
+            old = pi2["Attributes"]
+            pi2["Attributes"] = (old | DIRECT) if enable else (old & ~DIRECT)
+            win32print.SetPrinter(h, 2, pi2, 0)
+            return old
+        finally:
+            win32print.ClosePrinter(h)
+    except Exception:
+        return None
+
+
 def print_batch(doc, page_nums, printer_name, job_name, dpi):
     """把一批页面按给定顺序送到打印机，返回新产生的作业 id 集合"""
     import win32con
@@ -224,23 +245,32 @@ def run(doc, args):
         print("[dry-run] 未实际打印")
         return
 
-    job_ids = set()
+    # 接管后台设置：强制直连(前台)打印，大扫描件不进 spool、零等待；打完恢复
+    old_attr = set_printer_direct(args.printer, True)
+    if old_attr is None:
+        print("提示: 无法将打印机切换为直连(前台)打印，改用系统默认后台打印。")
+        print("      若大文件卡顿，请在 打印机属性→高级 勾选『立即开始打印』。")
+    try:
+        job_ids = set()
 
-    input("\n放好纸，按回车开始打印第一轮 -> ")
-    job_ids |= print_batch(doc, first, args.printer, "duplex-batch1", args.dpi)
-    if wait_print_done(args.printer, job_ids):
-        print("第一轮打印完成。")
-    else:
-        print("警告: 打印队列超时未清空，请确认出纸完毕再继续！")
+        input("\n放好纸，按回车开始打印第一轮 -> ")
+        job_ids |= print_batch(doc, first, args.printer, "duplex-batch1", args.dpi)
+        if wait_print_done(args.printer, job_ids):
+            print("第一轮打印完成。")
+        else:
+            print("警告: 打印队列超时未清空，请确认出纸完毕再继续！")
 
-    input("\n整叠纸原样放回纸盒，什么都不动。千万别翻面（翻了就印在字上）。按回车开始第二轮 -> ")
-    job_ids |= print_batch(doc, second, args.printer, "duplex-batch2", args.dpi)
-    if wait_print_done(args.printer, job_ids):
-        print("第二轮打印完成，成品在出纸口。")
-    else:
-        print("打印队列仍在处理，请等最后一张纸出来后再取。")
-    print("提示: 第1页在最上面、字朝上，直接可用，零整理。")
-    input("按回车退出。")
+        input("\n整叠纸原样放回纸盒，什么都不动。千万别翻面（翻了就印在字上）。按回车开始第二轮 -> ")
+        job_ids |= print_batch(doc, second, args.printer, "duplex-batch2", args.dpi)
+        if wait_print_done(args.printer, job_ids):
+            print("第二轮打印完成，成品在出纸口。")
+        else:
+            print("打印队列仍在处理，请等最后一张纸出来后再取。")
+        print("提示: 第1页在最上面、字朝上，直接可用，零整理。")
+        input("按回车退出。")
+    finally:
+        if old_attr is not None:
+            set_printer_direct(args.printer, False)  # 恢复原始设置
 
 
 def main():

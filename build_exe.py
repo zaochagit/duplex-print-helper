@@ -24,7 +24,7 @@ NAME = "双面打印助手"
 
 
 def build_green():
-    subprocess.run([PY, "-m", "PyInstaller", "--onedir", "--noconsole",
+    subprocess.run([PY, "-m", "PyInstaller", "--onedir", "--noconfirm", "--noconsole",
                    "--name", NAME, "duplex_gui.py"], check=True)
 
 
