@@ -3,10 +3,11 @@ __pycache__/
 *.py[cod]
 *.spec
 
-# PyInstaller 产物（exe 走 GitHub Releases，不进仓库）
+# PyInstaller 产物（绿色版 zip / exe 走 GitHub Releases，不进仓库）
 build/
 dist/
 *.exe
+*.zip
 
 # 操作系统
 Thumbs.db

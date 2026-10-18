@@ -1,38 +1,33 @@
 # -*- coding: utf-8 -*-
 """
-打包脚本：生成两个 exe
-用法（在 pdfocr venv 下运行，且已 pip install pyinstaller windnd）:
-    python build_exe.py          # 两个都打
-    python build_exe.py self     # 只打自包含版（可拷到别的机器，不依赖本机环境）
-    python build_exe.py local    # 只打本机 launcher 版（小、快，依赖 D:\envs\pdfocr）
+打包脚本：生成「绿色版」文件夹（onedir）
+========================================
+用法（在已装好依赖的 Python 环境下运行）:
+    python build_exe.py
+
+产物: dist\双面打印助手\  （一个文件夹，内含 双面打印助手.exe + 依赖库）
+      -> 整个文件夹压缩后即为可分享的绿色版，解压到任意位置双击即用，无需安装。
+
+⚠️ 体积提示:
+    PyInstaller 会把当前 venv 里装的所有包都打进去。如果在装了 torch/cv2/scipy
+    等重型包的环境里打包，体积会从几十 MB 暴涨到几百 MB。
+    建议新建一个只装必要依赖的干净虚拟环境再打包:
+        python -m venv dup_build
+        dup_build\Scripts\pip install PyMuPDF pywin32 Pillow windnd pypdf pyinstaller
+        dup_build\Scripts\python build_exe.py
 """
-import os
 import subprocess
 import sys
 
-PY = sys.executable  # 应在 pdfocr venv 下运行
-SEP = os.pathsep     # Windows 用 ';'，Linux/macOS 用 ':'
-SELF_NAME = "双面打印助手"
-LOCAL_NAME = "双面打印助手-本机"
+PY = sys.executable  # 当前 python 解释器
+NAME = "双面打印助手"
 
 
-def build_self():
-    subprocess.run([PY, "-m", "PyInstaller", "--onefile", "--noconsole",
-                   "--name", SELF_NAME, "duplex_gui.py"], check=True)
-
-
-def build_local():
-    subprocess.run([PY, "-m", "PyInstaller", "--onefile", "--noconsole",
-                   "--name", LOCAL_NAME,
-                   "--add-data", "duplex_gui.py" + SEP + ".",
-                   "--add-data", "duplex_print.py" + SEP + ".",
-                   "duplex_launcher.py"], check=True)
+def build_green():
+    subprocess.run([PY, "-m", "PyInstaller", "--onedir", "--noconsole",
+                   "--name", NAME, "duplex_gui.py"], check=True)
 
 
 if __name__ == "__main__":
-    which = sys.argv[1] if len(sys.argv) > 1 else "all"
-    if which in ("self", "all"):
-        build_self()
-    if which in ("local", "all"):
-        build_local()
-    print("完成。exe 在 dist\\ 目录。")
+    build_green()
+    print("完成。绿色版文件夹在 dist\\%s\\" % NAME)

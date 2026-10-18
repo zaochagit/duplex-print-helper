@@ -21,11 +21,17 @@
 - 放回时不翻面，取纸顺序自然倒过来，所以**第二轮用降序**打印，让第 1 页最后打、压在最上面。
 - **总页数奇数**时，第一轮末尾会自动多打一张空白页（把末页那张纸先走一遍），两轮张数相等，末页正好是第 1 页。
 
-## 使用方法
+## 下载与运行（绿色版，无需安装）
 
-### 图形界面（推荐）
+提供「绿色版」：一个文件夹，解压到任意位置（U盘、D盘都行）直接双击里面的 `双面打印助手.exe` 即可，
+**不用安装、不写注册表**。打印机选择等设置保存在系统目录 `%APPDATA%\duplex_print\config.json`，
+所以**只在第一次运行时选一次打印机，之后都记住**，不会因为放在不同位置而重设。
 
-双击 `双面打印助手.exe`（或本机版 `双面打印助手-本机.exe`）：
+> 绿色版在 Releases 里下载（`双面打印助手-绿色版.zip`）。解压后整个文件夹带走即可。
+
+### 图形界面
+
+双击 `双面打印助手.exe`：
 
 1. 首次启动会让你选打印机，选定后记住，以后不再问；
 2. 文件路径可以「输入框粘贴 / 点浏览 / 直接把文件拖进窗口」；
@@ -34,18 +40,18 @@
 
 ### 命令行 / 拖拽
 
-把 PDF 或 Word 拖到 `duplex.bat` 上即可。或：
+有 Python 环境时，把 PDF 或 Word 拖到 `duplex.bat` 上即可。或：
 
 ```bat
-D:\envs\pdfocr\Scripts\python.exe duplex_print.py 文件.pdf
-D:\envs\pdfocr\Scripts\python.exe duplex_print.py --calibrate   # 校准
-D:\envs\pdfocr\Scripts\python.exe duplex_print.py --dry-run     # 只看计划不打印
+python duplex_print.py 文件.pdf
+python duplex_print.py --calibrate   # 校准
+python duplex_print.py --dry-run     # 只看计划不打印
 ```
 
 ## 首次使用：校准（建议）
 
 ```bat
-D:\envs\pdfocr\Scripts\python.exe duplex_print.py --calibrate
+python duplex_print.py --calibrate
 ```
 
 打完检查两件事：
@@ -55,7 +61,7 @@ D:\envs\pdfocr\Scripts\python.exe duplex_print.py --calibrate
 
 本工具的默认顺序已按 Brother DCP-T420W 实测机制调好，多数机器直接可用。
 
-## 从源码运行
+## 从源码运行 / 自己打包
 
 需要 Windows + Python 3.11，并安装依赖：
 
@@ -65,15 +71,15 @@ pip install -r requirements.txt
 
 其中 `pywin32` 用于直驱打印机，`PyMuPDF` 渲染页面，`windnd` 用于窗口拖放。
 
-## 打包成 exe
+打包成绿色版（onedir 文件夹）：
 
 ```bat
 pip install pyinstaller windnd
-python build_exe.py            # 生成两个 exe 到 dist\
+python build_exe.py            # 在 dist\双面打印助手\ 生成绿色版文件夹
 ```
 
-- `双面打印助手.exe`：自包含版，可拷到任意同架构 Windows 机器，不依赖本机环境；
-- `双面打印助手-本机.exe`：极小 launcher，复用本机 `D:\envs\pdfocr` 的 Python 环境，启动快、体积小。
+> 建议在一个**只装了必要依赖的干净虚拟环境**里打包，否则 PyInstaller 会把无关的重型包（如 torch/cv2）一并打进去，
+> 体积会从几十 MB 暴涨到几百 MB。本项目自带 `requirements.txt` 只列了必要包。
 
 ## 文件说明
 
@@ -81,9 +87,8 @@ python build_exe.py            # 生成两个 exe 到 dist\
 |---|---|
 | `duplex_print.py` | 拆页 / 打印核心逻辑（被 GUI 复用） |
 | `duplex_gui.py` | tkinter 图形界面 |
-| `duplex_launcher.py` | 本机 launcher（小 exe 用） |
-| `duplex.bat` | 命令行 / 拖拽入口 |
-| `build_exe.py` | 打包脚本 |
+| `duplex.bat` | 命令行 / 拖拽入口（需本机 Python 环境） |
+| `build_exe.py` | 打包脚本（生成绿色版文件夹） |
 
 ## 许可证
 
