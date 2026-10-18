@@ -1,8 +1,9 @@
-# 运行依赖（Windows + Python 3.11）
+# 运行依赖
 PyMuPDF>=1.23
 pywin32>=306
 Pillow>=10.0
 windnd>=0.1
+pypdf>=4.0
 
 # 仅打包 exe 时需要
 pyinstaller>=6.0
