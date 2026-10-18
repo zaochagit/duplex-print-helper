@@ -27,7 +27,7 @@
 **不用安装、不写注册表**。打印机选择等设置保存在系统目录 `%APPDATA%\duplex_print\config.json`，
 所以**只在第一次运行时选一次打印机，之后都记住**，不会因为放在不同位置而重设。
 
-> 绿色版在 Releases 里下载（`双面打印助手-绿色版.zip`）。解压后整个文件夹带走即可。
+> 绿色版在 [Releases 下载](https://github.com/zaochagit/duplex-print-helper/releases/download/v1.0/duplex-print-helper-green.zip)（`duplex-print-helper-green.zip`，约 38MB）。解压后整个文件夹带走即可。
 
 ### 图形界面
 
