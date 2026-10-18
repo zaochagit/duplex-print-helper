@@ -16,3 +16,6 @@ Thumbs.db
 # 编辑器 / 临时
 *.swp
 *.tmp
+
+# 本地辅助脚本（含硬编码本机路径，仅供个人使用，不进仓库）
+duplex_launcher.py
