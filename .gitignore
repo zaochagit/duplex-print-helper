@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.spec
+
+# PyInstaller 产物（exe 走 GitHub Releases，不进仓库）
+build/
+dist/
+*.exe
+
+# 操作系统
+Thumbs.db
+.DS_Store
+
+# 编辑器 / 临时
+*.swp
+*.tmp

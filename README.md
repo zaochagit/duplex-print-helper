@@ -1,0 +1,90 @@
+# 手动双面打印助手
+
+给「只能手动双面」的喷墨打印机（实测 Brother DCP-T420W）用的自动双面打印工具。
+支持 **PDF** 和 **Word**（`.doc` / `.docx` / `.docm` / `.rtf`，自动经本机 Word 转 PDF，版式与 Word 打印一致）。
+
+## 为什么需要它
+
+手动双面打印的麻烦不在「翻面」，而在「配对」：先打哪几页、翻回去后顺序怎么对得上。
+本工具按一套经过验证的规则自动算好两轮打印计划，你只需要：
+
+> 放纸 → 等第一轮 → **整叠原样放回** → 确认 → 第二轮
+
+出来的成品第 1 页就在最上面，**零整理**。
+
+## 核心规则（务必看一眼）
+
+喷墨纸盒是「打印面朝下装入」，实际打在纸的**朝下一面**，出纸后字面朝上。因此：
+
+- ⚠️ **第一轮打完，整叠纸【原样】放回纸盒，千万别翻面！**
+  翻面会让第二遍直接印在已经印字的那一面上，整叠报废。
+- 放回时不翻面，取纸顺序自然倒过来，所以**第二轮用降序**打印，让第 1 页最后打、压在最上面。
+- **总页数奇数**时，第一轮末尾会自动多打一张空白页（把末页那张纸先走一遍），两轮张数相等，末页正好是第 1 页。
+
+## 使用方法
+
+### 图形界面（推荐）
+
+双击 `双面打印助手.exe`（或本机版 `双面打印助手-本机.exe`）：
+
+1. 首次启动会让你选打印机，选定后记住，以后不再问；
+2. 文件路径可以「输入框粘贴 / 点浏览 / 直接把文件拖进窗口」；
+3. 点「开始打印」→ 打完第一轮弹确认框（防误操作）→ 确认后打第二轮；
+4. 「校准测试」按钮用 2 张纸验证你机器的进出纸机制。
+
+### 命令行 / 拖拽
+
+把 PDF 或 Word 拖到 `duplex.bat` 上即可。或：
+
+```bat
+D:\envs\pdfocr\Scripts\python.exe duplex_print.py 文件.pdf
+D:\envs\pdfocr\Scripts\python.exe duplex_print.py --calibrate   # 校准
+D:\envs\pdfocr\Scripts\python.exe duplex_print.py --dry-run     # 只看计划不打印
+```
+
+## 首次使用：校准（建议）
+
+```bat
+D:\envs\pdfocr\Scripts\python.exe duplex_print.py --calibrate
+```
+
+打完检查两件事：
+
+1. 有没有「字叠字」（某面被印了两次）→ 有说明放回时把纸叠翻面了，重打；
+2. 第 1 页的背面是不是第 2 页 → 对就正常。
+
+本工具的默认顺序已按 Brother DCP-T420W 实测机制调好，多数机器直接可用。
+
+## 从源码运行
+
+需要 Windows + Python 3.11，并安装依赖：
+
+```bat
+pip install -r requirements.txt
+```
+
+其中 `pywin32` 用于直驱打印机，`PyMuPDF` 渲染页面，`windnd` 用于窗口拖放。
+
+## 打包成 exe
+
+```bat
+pip install pyinstaller windnd
+python build_exe.py            # 生成两个 exe 到 dist\
+```
+
+- `双面打印助手.exe`：自包含版，可拷到任意同架构 Windows 机器，不依赖本机环境；
+- `双面打印助手-本机.exe`：极小 launcher，复用本机 `D:\envs\pdfocr` 的 Python 环境，启动快、体积小。
+
+## 文件说明
+
+| 文件 | 作用 |
+|---|---|
+| `duplex_print.py` | 拆页 / 打印核心逻辑（被 GUI 复用） |
+| `duplex_gui.py` | tkinter 图形界面 |
+| `duplex_launcher.py` | 本机 launcher（小 exe 用） |
+| `duplex.bat` | 命令行 / 拖拽入口 |
+| `build_exe.py` | 打包脚本 |
+
+## 许可证
+
+MIT —— 见 [LICENSE](LICENSE)。

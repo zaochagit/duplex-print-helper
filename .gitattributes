@@ -1,0 +1,5 @@
+# 统一换行符
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.bat text eol=crlf
